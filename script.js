@@ -10,6 +10,7 @@
   const $posts = get('.posts');
   const end = 100;
   let total = 10;
+  let timer = 0;
 
   const $loader = get(".loader");
 
@@ -71,8 +72,15 @@
     }
   }
 
+  const throttle = (callback, time) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      callback();
+    }, time)
+  }
+
   window.addEventListener('DOMContentLoaded', () => {
     loadPost();
-    window.addEventListener('scroll', onScroll);
+    window.addEventListener('scroll', () => throttle(onScroll, 50));
   })
 })()
