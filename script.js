@@ -5,10 +5,16 @@
     return document.querySelector(target)
   }
 
+  let page = 1;
+  const limit = 10;
   const $posts = get('.posts');
+  const end = 100;
+  let total = 10;
+
+  const $loader = get(".loader");
 
   const getPost = async () => {
-    const API_URL = 'https://jsonplaceholder.typicode.com/posts';
+    const API_URL = `https://jsonplaceholder.typicode.com/posts?_page=${page}&_limit=${limit}`;
     const reponse = await fetch(API_URL);
     if (!reponse.ok) {
       throw new Error('에러');
@@ -31,11 +37,42 @@
   }
 
   const loadPost = async () => {
-    const response = await getPost();
-    showPosts(response);
+    showLoader();
+    try {
+      const response = await getPost();
+      showPosts(response);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      hideLoader();
+    }
+  }
+
+  const showLoader = () => {
+    $loader.classList.add('show');
+  }
+
+  const hideLoader = () => {
+    $loader.classList.remove('show');
+  }
+
+  const onScroll =  () => {
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+
+    if (total === end) {
+      window.removeEventListener('scroll', onScroll);
+      return;
+    }
+    if (scrollTop + clientHeight >= scrollHeight - 5) {
+      page++;
+      total += 10;
+      loadPost();
+      return;
+    }
   }
 
   window.addEventListener('DOMContentLoaded', () => {
     loadPost();
+    window.addEventListener('scroll', onScroll);
   })
 })()
